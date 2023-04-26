@@ -25,12 +25,14 @@ let schema = buildSchema(`
         idstudent: Int!
         ine: String
         grade: [Grade!]!
+        user: User!
       }
       
       type Teacher {
         idteacher: Int!
         isAgreement: Int!
         course: [Course!]!
+        user: User!
       }
       type User {
         iduser: ID!
@@ -38,8 +40,13 @@ let schema = buildSchema(`
         firstname: String!
         email: String!
         password: String!
+        role: Role!
         student: [Student!]!
-      }   
+      }  
+      type Role {
+        idrole: ID!
+        name: String!
+      } 
       
       type Query {
         getStudent: [Student]
@@ -50,9 +57,20 @@ let schema = buildSchema(`
         firstname: String!
         email: String!
         password: String!
+        idrole: Int!
+    }
+    input studentInput{
+        ine: String!
+        iduser: Int!
+    }
+    input teacherInput{
+        isAgreement: Int!
+        iduser: Int!
     }
     type Mutation {
-        insertUser(value: userInput): [User]
+        insertUser(value: userInput): User
+        insertStudent(value: studentInput): Student
+        insertTeacher(value: teacherInput): Teacher
     }
   
 `)
@@ -60,7 +78,9 @@ let schema = buildSchema(`
 let root = {
     getStudent: async () => {
         return prisma.student.findMany({
-
+            include: {
+                user: true
+            }
         })
     },
     getUser: async () => {
@@ -68,20 +88,71 @@ let root = {
 
         })
     },
-    insertUser: async ({value}) => {
-        console.log(value)
-       const userCreate =  await prisma.user.create({
-            data:{
-                email : value.email,
-                firstname : value.firstname,
-                lastname  : value.lastname,
-                password: value.password
+    insertUser: async ({ value }) => {
+        const role =await prisma.role.findUnique({
+            where:{
+                idrole: value.idrole
             }
         })
-        console.log(userCreate, "create")
-        return await prisma.user.findMany({
-           
+        if(role){
+            const userCreate = await prisma.user.create({
+                data: {
+                    role_idrole: role.idrole,
+                    lastname: value.lastname,
+                    firstname: value.firstname,
+                    email : value.email,
+                    password: value.password
+                },
+                include:{
+                    role:true
+                }
+            })
+            return userCreate
+        }
+
+    },
+    insertStudent: async ({ value }) => {
+        const user = await prisma.user.findUnique({
+            where: {
+                iduser: value.iduser
+            }
         })
+        if (user && user.role_idrole == 1) {
+            const studentCreate = await prisma.student.create({
+                data: {
+                    user_iduser: value.iduser,
+                    ine: value.ine
+                },
+                include: {
+                    user:true
+                }
+            })
+            return studentCreate
+        }
+        return null;
+    },
+    insertTeacher: async ({ value }) => {
+        console.log(value)
+        const user = await prisma.user.findUnique({
+            where: {
+                iduser: value.iduser
+            }
+        })
+        console.log(user, "user")
+        if (user && user.role_idrole == 2) {
+            const teacherCreate = await prisma.teacher.create({
+                data: {
+                    user_iduser: value.iduser,
+                    isAgreement: value.isAgreement
+                },
+                include: {
+                    user:true
+                }
+            })
+            console.log(teacherCreate)
+            return teacherCreate
+        }
+        return null;
     },
 }
 

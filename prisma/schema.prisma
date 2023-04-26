@@ -50,11 +50,19 @@ model teacher {
 }
 
 model user {
-  iduser    Int       @id @unique(map: "iduser_UNIQUE") @default(autoincrement())
-  lastname  String    @db.VarChar(45)
-  firstname String    @db.VarChar(45)
-  email     String    @unique(map: "email_UNIQUE") @db.VarChar(45)
-  password  String    @db.VarChar(45)
-  student   student[]
-  teacher   teacher[]
+  iduser      Int       @id @unique(map: "iduser_UNIQUE") @default(autoincrement())
+  lastname    String    @db.VarChar(45)
+  firstname   String    @db.VarChar(45)
+  email       String    @unique(map: "email_UNIQUE") @db.VarChar(45)
+  password    String    @db.VarChar(45)
+  student     student[]
+  teacher     teacher[]
+  role_idrole Int
+  role        role      @relation(fields: [role_idrole], references: [idrole], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model role {
+  idrole    Int       @id @unique(map: "idrole_UNIQUE") @default(autoincrement())
+  name      String    @db.VarChar(45)
+  user      user[]
 }

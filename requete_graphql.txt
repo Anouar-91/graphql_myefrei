@@ -1,0 +1,61 @@
+mutation {
+  insertStudent(value: {
+    ine: "ine test",
+    iduser: 3
+  }){
+    idstudent,
+    ine,
+    user{
+      lastname,
+      firstname,
+      email,
+    }
+  }
+}
+
+mutation{
+  insertUser(value:{
+    lastname: "test",
+    firstname: "jdh",
+    email:"dzdzdzdzzdz@bhgroupe.fr",
+    password: "tzdest",
+    idrole: 1
+  }){
+    iduser,
+    lastname,
+    firstname,
+    email,
+    role{name}
+  	
+  }
+}
+
+mutation {
+  insertTeacher(value: {
+    isAgreement: true,
+    iduser: 3
+  }){
+    idteacher,
+    isAgreement,
+    user{
+      lastname,
+      firstname,
+      email,
+    }
+  }
+}
+
+mutation {
+  insertTeacher(value: {
+    isAgreement: 1,
+    iduser: 8
+  }){
+    idteacher,
+    isAgreement,
+    user{
+      lastname,
+      firstname,
+      email,
+    }
+  }
+}
