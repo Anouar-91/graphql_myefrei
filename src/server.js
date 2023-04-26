@@ -67,10 +67,15 @@ let schema = buildSchema(`
         isAgreement: Int!
         iduser: Int!
     }
+    input courseInput{
+        name: String!
+        idteacher: Int!
+    }
     type Mutation {
         insertUser(value: userInput): User
         insertStudent(value: studentInput): Student
         insertTeacher(value: teacherInput): Teacher
+        insertCourse(value: courseInput): Course
     }
   
 `)
@@ -132,13 +137,11 @@ let root = {
         return null;
     },
     insertTeacher: async ({ value }) => {
-        console.log(value)
         const user = await prisma.user.findUnique({
             where: {
                 iduser: value.iduser
             }
         })
-        console.log(user, "user")
         if (user && user.role_idrole == 2) {
             const teacherCreate = await prisma.teacher.create({
                 data: {
@@ -149,8 +152,24 @@ let root = {
                     user:true
                 }
             })
-            console.log(teacherCreate)
             return teacherCreate
+        }
+        return null;
+    },
+    insertCourse: async ({ value }) => {
+        const teacher = await prisma.teacher.findUnique({
+            where: {
+                idteacher: value.idteacher
+            }
+        })
+        if (teacher) {
+            const course = await prisma.course.create({
+                data: {
+                    teacher_idteacher: value.idteacher,
+                    name: value.name
+                }
+            })
+            return course
         }
         return null;
     },
