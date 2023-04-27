@@ -49,8 +49,11 @@ let schema = buildSchema(`
       } 
       
       type Query {
-        getStudent: [Student]
-        getUser: [User]
+        getAllStudent: [Student]
+        getAllUser: [User]
+        getAllTeacher: [Teacher]
+        getAllCourse: [Course]
+        getAllGrade: [Grade]
     }
     input userInput{
         lastname: String!
@@ -71,26 +74,85 @@ let schema = buildSchema(`
         name: String!
         idteacher: Int!
     }
+    input gradeInput{
+        result: Float!
+        idcourse: Int!
+        idstudent: Int!
+    }
+    input updateUserInput{
+        lastname: String
+        firstname: String
+        password: String
+        iduser: Int!
+    }
+    input updateStudentInput{
+        ine: String!
+        idstudent: Int!
+    }
+    input updateTeacherInput{
+        isAgreement: Int!
+        idteacher: Int!
+    }
+    input updateCourseInput{
+        name: String!
+        idcourse: Int!
+    }
+    input updateGradeInput{
+        result: Float!
+        idgrade: Int!
+    }
     type Mutation {
         insertUser(value: userInput): User
         insertStudent(value: studentInput): Student
         insertTeacher(value: teacherInput): Teacher
         insertCourse(value: courseInput): Course
+        insertGrade(value: gradeInput): Grade
+        updateUser(value: updateUserInput): User
+        updateStudent(value: updateStudentInput): Student
+        updateTeacher(value: updateTeacherInput): Teacher
+        updateCourse(value: updateCourseInput): Course
+        updateGrade(value: updateGradeInput): Grade
+        deleteGrade(id: Int): [Grade]
     }
   
 `)
 
 let root = {
-    getStudent: async () => {
+    getAllStudent: async () => {
         return prisma.student.findMany({
             include: {
                 user: true
             }
         })
     },
-    getUser: async () => {
+    getAllUser: async () => {
         return prisma.user.findMany({
 
+        })
+    },
+    getAllTeacher: async () => {
+        return prisma.teacher.findMany({
+            include: {
+                user:true
+            }
+        })
+    },
+    getAllCourse: async () => {
+        return prisma.course.findMany({
+
+        })
+    },
+    getAllGrade: async () => {
+        console.log("jes uis la")
+        return prisma.grade.findMany({
+            include: {
+                student: {
+                    select: {
+                        user: true
+                      }
+                },
+                course:true
+            }
         })
     },
     insertUser: async ({ value }) => {
@@ -173,6 +235,103 @@ let root = {
         }
         return null;
     },
+    insertGrade: async ({ value }) => {
+        const student = await prisma.student.findUnique({
+            where: {
+                idstudent: value.idstudent
+            }
+        })
+        const course = await prisma.course.findUnique({
+            where: {
+                idcourse: value.idcourse
+            }
+        })
+        if (student && course) {
+            const grade = await prisma.grade.create({
+                data: {
+                    course_idcourse: value.idcourse,
+                    student_idstudent: value.idstudent,
+                    result: value.result
+                },
+                include:{
+                    student: {
+                        select: {
+                            user: true
+                          }
+                    },
+                    course:true
+                }
+            })
+            return grade
+        }
+        return null;
+    },
+    updateUser: async ({value }) => {
+        const editor = await prisma.user.update({
+            where: {
+                iduser: value.iduser,
+            },
+            data: {
+                lastname: value.lastname,
+                firstname: value.firstname,
+                password: value.password,
+            },
+          })
+        return editor
+    },
+    updateStudent: async ({value }) => {
+        const update = await prisma.student.update({
+            where: {
+                idstudent: value.idstudent,
+            },
+            data: {
+                ine: value.ine,
+            },
+          })
+        return update
+    },
+    updateTeacher: async ({value }) => {
+        const update = await prisma.teacher.update({
+            where: {
+                idteacher: value.idteacher,
+            },
+            data: {
+                isAgreement: value.isAgreement,
+            },
+          })
+        return update
+    },
+    updateCourse: async ({value }) => {
+        const update = await prisma.course.update({
+            where: {
+                idcourse: value.idcourse,
+            },
+            data: {
+                name: value.name,
+            },
+          })
+        return update
+    },
+    updateGrade: async ({value }) => {
+        const update = await prisma.grade.update({
+            where: {
+                idgrade: value.idgrade,
+            },
+            data: {
+                result: value.result,
+            },
+          })
+        return update
+    },
+    deleteGrade: async ({id}) => {
+        const deleteGrade = await prisma.grade.deleteMany({
+            where: {
+                idgrade: id,
+              },
+        });
+        const grades = await prisma.grade.findMany({})
+        return grades;
+    }
 }
 
 app.use("/graphql", graphqlHTTP({

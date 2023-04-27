@@ -60,3 +60,124 @@ mutation {
   }
 }
 
+mutation {
+  insertCourse(value: {
+    name: "graphql_m1_dev_21-22",
+    idteacher: 1
+  }){
+    name
+  }
+}
+
+mutation {
+  insertGrade(value: {
+    result: 12.9,
+    idcourse: 1,
+    idstudent: 1
+  }){
+    result,
+    idgrade,
+    student{
+      user{
+        lastname,
+        firstname,
+        email
+      }
+    }
+    course{
+      idcourse,
+      name
+    }
+  }
+}
+
+
+query{
+  getAllGrade{
+    idgrade
+    result
+    student{
+      user{
+        lastname,
+        firstname
+      }
+    }
+    course{name}
+  }
+}
+
+query{
+  getAllCourse{
+    name
+  }
+}
+
+query{
+  getAllTeacher{
+    idteacher,
+    user{
+      iduser
+    	lastname
+      firstname
+    }
+  }
+}
+
+mutation{
+  updateUser(value: {
+    iduser: 1,
+    lastname: "update"
+  }){
+    lastname,
+    firstname,
+    password
+  }
+}
+
+mutation{
+  updateStudent(value:{
+    ine: "ineUpdate",
+    idstudent: 1
+  }){idstudent,
+  ine
+  }
+}
+
+
+mutation{
+  updateTeacher(value:{
+    isAgreement: 0,
+    idteacher: 1
+  }){
+    idteacher,
+    isAgreement
+  }
+}
+
+
+mutation{
+  updateCourse(value:{
+    name: "test update",
+    idcourse: 1
+  }){
+    idcourse,
+    name
+  }
+}
+
+
+mutation{
+  updateGrade(value:{
+    result: 16.6,
+    idgrade: 1
+  }){
+    idgrade,
+    result
+  }
+}
+
+mutation{
+  deleteGrade(id: 2){
+    result
+  }
+}
