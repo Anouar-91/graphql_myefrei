@@ -113,6 +113,9 @@ let schema = buildSchema(`
         updateCourse(value: updateCourseInput): Course
         updateGrade(value: updateGradeInput): Grade
         deleteGrade(id: Int): [Grade]
+        deleteCourse(id: Int): [Course]
+        deleteStudent(id: Int): [Student]
+        deleteTeacher(id: Int): [Teacher]
     }
   
 `)
@@ -331,7 +334,49 @@ let root = {
         });
         const grades = await prisma.grade.findMany({})
         return grades;
-    }
+    },
+    deleteCourse: async ({id}) => {
+           const grades =  await prisma.grade.deleteMany({
+                where: {
+                    course_idcourse: id,
+                  },
+            })
+        await prisma.course.deleteMany({
+            where: {
+                idcourse: id,
+              },
+        })
+        const courses = await prisma.course.findMany({})
+        return courses;
+    },
+    deleteStudent: async ({id}) => {
+           const grades =  await prisma.grade.deleteMany({
+                where: {
+                    student_idstudent: id,
+                  },
+            })
+        await prisma.student.deleteMany({
+            where: {
+                idstudent: id,
+              },
+        })
+        const students = await prisma.student.findMany({})
+        return students;
+    },
+    deleteTeacher: async ({id}) => {
+           const courses =  await prisma.course.deleteMany({
+                where: {
+                    teacher_idteacher: id,
+                  },
+            })
+        await prisma.teacher.deleteMany({
+            where: {
+                idteacher: id,
+              },
+        })
+        const teachers = await prisma.teacher.findMany({})
+        return teachers;
+    },
 }
 
 app.use("/graphql", graphqlHTTP({

@@ -181,3 +181,10 @@ mutation{
     result
   }
 }
+
+
+mutation{
+  deleteStudent(id: 1){
+    idstudent
+  }
+}
