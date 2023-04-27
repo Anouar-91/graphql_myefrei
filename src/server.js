@@ -3,10 +3,13 @@ import express from "express"
 import { graphqlHTTP } from "express-graphql"
 import { buildSchema } from "graphql"
 import { PrismaClient } from '@prisma/client'
-
+import bcrypt from "bcryptjs";
+import userRoutes from "./routes/userRoutes"
+import { protect } from "./middleware/authMiddleware"
 const prisma = new PrismaClient()
 const app = express()
-
+//allow to accept json in body
+app.use(express.json())
 let schema = buildSchema(`
     type Course {
         idcourse: Int!
@@ -165,13 +168,15 @@ let root = {
             }
         })
         if(role){
+            const salt = await bcrypt.genSalt(10)
+            const password = await bcrypt.hash(value.password, salt)
             const userCreate = await prisma.user.create({
                 data: {
                     role_idrole: role.idrole,
                     lastname: value.lastname,
                     firstname: value.firstname,
                     email : value.email,
-                    password: value.password
+                    password: password
                 },
                 include:{
                     role:true
@@ -378,13 +383,28 @@ let root = {
         return teachers;
     },
 }
+// router de login pour récupérer un token
+app.use('/api/users', userRoutes);
 
+app.get('/', (req, res) => {
+    res.send('API is running...')
+})
+
+
+/* Commenter les lignes ci-dessous pour mettre en place la sécurité par token */
 app.use("/graphql", graphqlHTTP({
     schema: schema,
     rootValue: root,
     graphiql: true
 }))
 
+/* Décommenter les lignes ci-dessous pour mettre en place la sécurité par token */
+/* app.use("/graphql", protect, graphqlHTTP({
+    schema: schema,
+    rootValue: root,
+    graphiql: true
+}))
+ */
 app.listen(3400, () => {
     console.log("API GRAPHQL listening on 3400")
 })

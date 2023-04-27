@@ -54,7 +54,7 @@ model user {
   lastname    String    @db.VarChar(45)
   firstname   String    @db.VarChar(45)
   email       String    @unique(map: "email_UNIQUE") @db.VarChar(45)
-  password    String    @db.VarChar(45)
+  password    String    @db.VarChar(255)
   student     student[]
   teacher     teacher[]
   role_idrole Int
